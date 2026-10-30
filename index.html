@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Для тебя 💌</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #ff4d79;
+    --pink-dark: #e0345f;
+    --ink: #3b1f2b;
+    --muted: #8a6272;
+    --bg1: #ffe3ec;
+    --bg2: #ffd0e0;
+    --bg3: #f3c9ff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(135deg, var(--bg1), var(--bg2) 50%, var(--bg3));
+    background-attachment: fixed;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    overflow-x: hidden;
+  }
+
+  /* Плавающие сердечки на фоне */
+  .hearts { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .heart {
+    position: absolute; bottom: -40px; opacity: 0;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+    10%  { opacity: .7; }
+    90%  { opacity: .5; }
+    100% { transform: translateY(-110vh) rotate(25deg); opacity: 0; }
+  }
+
+  .card {
+    position: relative; z-index: 2;
+    width: 100%; max-width: 440px;
+    background: rgba(255,255,255,.92);
+    border-radius: 28px;
+    padding: 36px 28px 30px;
+    box-shadow: 0 20px 60px rgba(224, 52, 95, .22);
+    text-align: center;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn .5s ease both; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .emoji { font-size: 56px; line-height: 1; margin-bottom: 10px; animation: beat 1.6s ease-in-out infinite; }
+  @keyframes beat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+  .hello { margin: 0 0 6px; color: var(--muted); font-weight: 600; font-size: 17px; }
+  h1, h2 {
+    font-family: 'Pacifico', 'Nunito', cursive;
+    font-weight: 400;
+    color: var(--pink-dark);
+    margin: 0 0 22px;
+    font-size: 30px;
+    line-height: 1.25;
+  }
+  .sub { margin: -10px 0 22px; color: var(--muted); font-size: 16px; }
+
+  .buttons {
+    display: flex; gap: 16px; justify-content: center; align-items: center;
+    min-height: 96px; flex-wrap: wrap;
+  }
+  .btn {
+    font: inherit; font-weight: 800; font-size: 20px;
+    border: 0; border-radius: 999px; cursor: pointer;
+    padding: 14px 38px;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-yes {
+    background: linear-gradient(135deg, #ff6b8f, var(--pink));
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(255, 77, 121, .4);
+    transition: transform .25s ease, box-shadow .15s ease;
+  }
+  .btn-yes:hover { box-shadow: 0 10px 26px rgba(255, 77, 121, .55); }
+  .btn-yes:active { filter: brightness(.95); }
+  .btn-no {
+    background: #f1e4ea; color: #7a5566;
+    touch-action: manipulation;
+  }
+  .btn-no.floating {
+    position: fixed; z-index: 50; margin: 0;
+    transition: left .28s cubic-bezier(.3,1.4,.5,1), top .28s cubic-bezier(.3,1.4,.5,1);
+  }
+  .no-slot { display: inline-block; }
+
+  .hint { min-height: 26px; margin: 14px 0 0; color: var(--muted); font-weight: 600; font-size: 16px; }
+
+  form { text-align: left; }
+  label { display: block; font-weight: 800; font-size: 15px; margin: 0 0 6px; color: var(--ink); }
+  .field { margin-bottom: 16px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  input[type="date"], input[type="time"], textarea {
+    width: 100%;
+    font: inherit; font-size: 17px; color: var(--ink);
+    background: #fff;
+    border: 2px solid #ffd0de; border-radius: 14px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  textarea { resize: vertical; min-height: 76px; }
+  input:focus, textarea:focus { border-color: var(--pink); box-shadow: 0 0 0 4px rgba(255, 77, 121, .15); }
+  .btn-send { width: 100%; margin-top: 4px; background: linear-gradient(135deg, #ff6b8f, var(--pink)); color: #fff; box-shadow: 0 8px 20px rgba(255, 77, 121, .35); }
+  .btn-send:disabled { opacity: .7; cursor: default; }
+  .error { min-height: 22px; margin: 10px 0 0; color: #c62828; font-weight: 600; font-size: 15px; text-align: center; }
+
+  .fallback { display: none; margin-top: 18px; padding: 14px; border-radius: 16px; background: #fff4f7; font-size: 15px; color: var(--muted); }
+  .fallback a { display: inline-block; margin-top: 8px; color: #fff; background: var(--pink); padding: 10px 20px; border-radius: 999px; text-decoration: none; font-weight: 800; }
+
+  .confetti-piece { position: fixed; left: 50%; top: 45%; font-size: 26px; pointer-events: none; z-index: 100; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .emoji, .heart { animation: none; }
+    .btn-no.floating { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hearts" id="hearts" aria-hidden="true"></div>
+
+<main class="card">
+
+  <!-- Экран 1: приглашение -->
+  <section class="screen active" id="screen1">
+    <div class="emoji">💌</div>
+    <p class="hello" id="hello">Привет!</p>
+    <h1>Ты пойдёшь со мной на свидание?</h1>
+    <div class="buttons" id="buttons">
+      <button type="button" class="btn btn-yes" id="yesBtn">Да 💕</button>
+      <span class="no-slot" id="noSlot">
+        <button type="button" class="btn btn-no" id="noBtn">Нет</button>
+      </span>
+    </div>
+    <p class="hint" id="hint" aria-live="polite"></p>
+  </section>
+
+  <!-- Экран 2: когда свободна -->
+  <section class="screen" id="screen2">
+    <div class="emoji">🗓️</div>
+    <h2>Когда у тебя свободное время?</h2>
+    <p class="sub">Выбери дату и время — я подстроюсь 😊</p>
+    <form id="form" novalidate>
+      <div class="row">
+        <div class="field">
+          <label for="date">Дата</label>
+          <input type="date" id="date" required>
+        </div>
+        <div class="field">
+          <label for="time">Время</label>
+          <input type="time" id="time" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="note">Пожелания (необязательно)</label>
+        <textarea id="note" placeholder="Например: люблю кофе и прогулки ☕"></textarea>
+      </div>
+      <button type="submit" class="btn btn-send" id="sendBtn">Отправить 💌</button>
+      <p class="error" id="error" role="alert"></p>
+    </form>
+  </section>
+
+  <!-- Экран 3: готово -->
+  <section class="screen" id="screen3">
+    <div class="emoji">🎉</div>
+    <h2>Ура!</h2>
+    <p class="sub" style="margin-top:-6px">Я всё получил и уже считаю минуты до встречи 💕</p>
+    <div class="fallback" id="fallback">
+      Не получилось отправить ответ автоматически. Нажми кнопку — откроется письмо, останется только отправить его мне:
+      <br><a id="mailtoLink" href="#">Отправить письмом ✉️</a>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ============ НАСТРОЙКИ ============ */
+const CONFIG = {
+  MY_EMAIL: "taras.shevchenko2020@list.ru", // ← сюда ваша почта, на неё придёт ответ
+  HER_NAME: ""                        // ← необязательно: имя девушки, например "Аня"
+};
+/* =================================== */
+
+const $ = (id) => document.getElementById(id);
+const screens = [$('screen1'), $('screen2'), $('screen3')];
+const yesBtn = $('yesBtn'), noBtn = $('noBtn'), noSlot = $('noSlot'), hint = $('hint');
+
+if (CONFIG.HER_NAME) $('hello').textContent = 'Привет, ' + CONFIG.HER_NAME + '!';
+if (!CONFIG.MY_EMAIL.includes('@') || CONFIG.MY_EMAIL.includes('ВАША_ПОЧТА')) {
+  console.warn('Укажите свою почту в CONFIG.MY_EMAIL, иначе ответ не придёт.');
+}
+
+function showScreen(n) {
+  screens.forEach((s, i) => s.classList.toggle('active', i === n));
+}
+
+/* ---------- Фоновые сердечки ---------- */
+(function hearts() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const box = $('hearts');
+  const list = ['💗', '💖', '💕', '💘', '🌸'];
+  for (let i = 0; i < 16; i++) {
+    const h = document.createElement('span');
+    h.className = 'heart';
+    h.textContent = list[i % list.length];
+    h.style.left = Math.random() * 100 + '%';
+    h.style.fontSize = 16 + Math.random() * 24 + 'px';
+    h.style.animationDuration = 9 + Math.random() * 10 + 's';
+    h.style.animationDelay = -Math.random() * 15 + 's';
+    box.appendChild(h);
+  }
+})();
+
+/* ---------- Убегающая кнопка «Нет» ---------- */
+const phrases = [
+  'Эй, кнопка-то убежала 🙈',
+  'Не поймаешь 😜',
+  'Может, всё-таки «Да»? 🥺',
+  'Ну пожалуйста 💕',
+  '«Нет» — неправильный ответ 😌',
+  'Я могу так весь день 🏃',
+  'Кнопка «Да» уже заждалась 👀'
+];
+let floating = false;
+let dodges = 0;
+let lastDodge = 0;
+
+function dodge(px, py) {
+  const now = Date.now();
+  if (now - lastDodge < 120) return;
+  lastDodge = now;
+
+  const w = noBtn.offsetWidth, h = noBtn.offsetHeight;
+
+  if (!floating) {
+    const r = noBtn.getBoundingClientRect();
+    noSlot.style.width = r.width + 'px';
+    noSlot.style.height = r.height + 'px';
+    noBtn.style.transition = 'none';
+    document.body.appendChild(noBtn);
+    noBtn.classList.add('floating');
+    noBtn.style.left = r.left + 'px';
+    noBtn.style.top = r.top + 'px';
+    void noBtn.offsetWidth;
+    noBtn.style.transition = '';
+    floating = true;
+  }
+
+  const vw = window.innerWidth, vh = window.innerHeight, m = 12;
+  const yes = yesBtn.getBoundingClientRect();
+  let best = null, bestDist = -1;
+
+  for (let i = 0; i < 60; i++) {
+    const x = m + Math.random() * Math.max(vw - w - 2 * m, 1);
+    const y = m + Math.random() * Math.max(vh - h - 2 * m, 1);
+    const overlapsYes = !(x + w < yes.left - 10 || x > yes.right + 10 || y + h < yes.top - 10 || y > yes.bottom + 10);
+    if (overlapsYes) continue;
+    const d = Math.hypot(x + w / 2 - px, y + h / 2 - py);
+    if (d > bestDist) { bestDist = d; best = { x, y }; }
+    if (d > 220) break;
+  }
+  if (!best) best = { x: m, y: m };
+
+  noBtn.style.left = best.x + 'px';
+  noBtn.style.top = best.y + 'px';
+
+  dodges++;
+  hint.textContent = phrases[(dodges - 1) % phrases.length];
+  yesBtn.style.transform = 'scale(' + Math.min(1 + dodges * 0.05, 1.45).toFixed(2) + ')';
+}
+
+function centerOf(el) {
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}
+
+// Курсор подошёл близко к кнопке — убегаем ещё до наведения
+document.addEventListener('pointermove', (e) => {
+  if (e.pointerType === 'touch' || !screens[0].classList.contains('active')) return;
+  const r = noBtn.getBoundingClientRect();
+  const dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
+  const dy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
+  if (Math.hypot(dx, dy) < 60) dodge(e.clientX, e.clientY);
+});
+noBtn.addEventListener('pointerenter', (e) => dodge(e.clientX, e.clientY));
+
+// Телефон / клавиатура: нажатие тоже не засчитывается
+function dodgeFromEvent(e) {
+  e.preventDefault();
+  const c = centerOf(noBtn);
+  dodge(e.clientX || c.x, e.clientY || c.y);
+}
+noBtn.addEventListener('pointerdown', dodgeFromEvent);
+noBtn.addEventListener('touchstart', dodgeFromEvent, { passive: false });
+noBtn.addEventListener('click', dodgeFromEvent);
+
+window.addEventListener('resize', () => {
+  if (!floating) return;
+  const r = noBtn.getBoundingClientRect();
+  const x = Math.min(Math.max(r.left, 12), window.innerWidth - r.width - 12);
+  const y = Math.min(Math.max(r.top, 12), window.innerHeight - r.height - 12);
+  noBtn.style.left = x + 'px';
+  noBtn.style.top = y + 'px';
+});
+
+/* ---------- «Да» ---------- */
+function confetti() {
+  const list = ['💖', '💕', '🎉', '✨', '🌸', '💘'];
+  for (let i = 0; i < 40; i++) {
+    const el = document.createElement('span');
+    el.className = 'confetti-piece';
+    el.textContent = list[i % list.length];
+    document.body.appendChild(el);
+    const a = Math.random() * Math.PI * 2;
+    const dist = 120 + Math.random() * 280;
+    const dx = Math.cos(a) * dist, dy = Math.sin(a) * dist - 80;
+    const anim = el.animate([
+      { transform: 'translate(-50%,-50%) scale(1)', opacity: 1 },
+      { transform: 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + (dy + 160) + 'px)) rotate(' + (Math.random() * 360 - 180) + 'deg) scale(.6)', opacity: 0 }
+    ], { duration: 1300 + Math.random() * 900, easing: 'cubic-bezier(.2,.8,.3,1)' });
+    anim.onfinish = () => el.remove();
+  }
+}
+
+yesBtn.addEventListener('click', () => {
+  noBtn.remove();
+  showScreen(1);
+  confetti();
+});
+
+/* ---------- Дата и время ---------- */
+const dateInput = $('date'), timeInput = $('time'), noteInput = $('note');
+const errorEl = $('error'), sendBtn = $('sendBtn');
+
+(function setMinDate() {
+  const d = new Date();
+  const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  dateInput.min = iso;
+})();
+
+function prettyDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return isNaN(d) ? iso : d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorEl.textContent = '';
+
+  const date = dateInput.value, time = timeInput.value, note = noteInput.value.trim();
+  if (!date || !time) {
+    errorEl.textContent = 'Выбери и дату, и время 🙂';
+    return;
+  }
+
+  const answer = {
+    'Ответ': 'Да, пойду на свидание 💕',
+    'Дата': prettyDate(date),
+    'Время': time,
+    'Пожелания': note || '—',
+    'Отправлено': new Date().toLocaleString('ru-RU')
+  };
+
+  sendBtn.disabled = true;
+  sendBtn.textContent = 'Отправляю…';
+
+  let ok = false;
+  try {
+    const res = await fetch('https://formsubmit.co/ajax/' + CONFIG.MY_EMAIL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(Object.assign({
+        _subject: '💌 Она ответила на приглашение!',
+        _template: 'table',
+        _captcha: 'false'
+      }, answer))
+    });
+    const data = await res.json().catch(() => ({}));
+    ok = res.ok && data.success !== false && data.success !== 'false';
+  } catch (err) {
+    ok = false;
+  }
+
+  if (!ok) {
+    const body = Object.keys(answer).map((k) => k + ': ' + answer[k]).join('\n');
+    $('mailtoLink').href = 'mailto:' + CONFIG.MY_EMAIL +
+      '?subject=' + encodeURIComponent('Мой ответ на приглашение 💌') +
+      '&body=' + encodeURIComponent(body);
+    $('fallback').style.display = 'block';
+  }
+
+  showScreen(2);
+  confetti();
+});
+</script>
+</body>
+</html>
